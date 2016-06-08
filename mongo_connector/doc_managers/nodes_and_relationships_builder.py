@@ -19,11 +19,7 @@ class NodesAndRelationshipsBuilder(object):
         self.explicit_ids = {}
         self.cypher_list = []
         self.statements_with_params = []
-        # normalized_doc = self._normalize_geo_key(doc_type, doc, doc_id)
         self.build_nodes_query(doc_type, doc, doc_id)
-
-    # def _normalize_geo_key(self, doc_type, document, id):
-
 
     def build_nodes_query(self, doc_type, document, id):
         self.doc_types.append(doc_type)
@@ -50,12 +46,14 @@ class NodesAndRelationshipsBuilder(object):
                     LOG.error('uid not present.')
                     continue
                 nested_id = document[key]['uid']
-                self.build_relationships_query(doc_type, key, id, nested_id)
+                relationship_direction = document[key].get('_r_dir', 1)
+                self.build_relationships_query(doc_type, key, id, nested_id, relationship_direction)
                 self.build_nodes_query(key, document[key], nested_id)
             elif self.is_json_array(document[key]):
                 for json in self.format_params(document[key]):
                     json_key = key + str(document[key].index(json))
-                    self.build_relationships_query(doc_type, json_key, id, id)
+                    relationship_direction = document[key].get('_r_dir', 1)
+                    self.build_relationships_query(doc_type, json_key, id, id, relationship_direction)
                     self.build_nodes_query(json_key, json, id)
             elif self.is_multimensional_array(document[key]):
                 parameters.update(self.flatenned_property(key, document[key]))
@@ -133,9 +131,15 @@ class NodesAndRelationshipsBuilder(object):
     def is_json_array(self, doc_key):
         return ((type(doc_key) is list) and (doc_key) and (type(doc_key[0]) is dict))
 
-    def build_relationships_query(self, main_type, node_type, doc_id, explicit_id):
+    def build_relationships_query(self, main_type, node_type, doc_id, explicit_id, relationship_direction):
         relationship_type = main_type + "_" + node_type
-        statement = "MATCH (a:`{main_type}`), (b:`{node_type}`) WHERE a.uid={{doc_id}} AND b.uid ={{explicit_id}} CREATE UNIQUE (a)-[r:`{relationship_type}`]->(b)".format(
-            main_type=main_type, node_type=node_type, relationship_type=relationship_type)
+        if relationship_direction == 1:
+            statement = "MATCH (a:`{main_type}`), (b:`{node_type}`) WHERE a.uid={{doc_id}} AND b.uid ={{explicit_id}} CREATE UNIQUE (a)-[r:`{relationship_type}`]->(b)".format(
+                main_type=main_type, node_type=node_type, relationship_type=relationship_type)
+        elif relationship_direction == 0:
+            statement = "MATCH (a:`{main_type}`), (b:`{node_type}`) WHERE a.uid={{doc_id}} AND b.uid ={{explicit_id}} CREATE UNIQUE (a)<-[r:`{relationship_type}`]-(b)".format(
+                main_type=main_type, node_type=node_type, relationship_type=relationship_type)
+        else:
+            return None
         params = {"doc_id": doc_id, "explicit_id": explicit_id}
         self.relationships_query.update({statement: params})
