@@ -13,7 +13,7 @@ class NodesAndRelationshipsBuilder(object):
     def __init__(self, doc, doc_type, doc_id, metadata={}, doc_types=[]):
         self.doc_id = doc_id
         self.query_nodes = {}
-        self.relationships_query = {}
+        self.relationships_query = []
         self.metadata = metadata or {}
         self.doc_types = doc_types or []
         self.explicit_ids = {}
@@ -146,4 +146,5 @@ class NodesAndRelationshipsBuilder(object):
         else:
             return None
         params = {"doc_id": doc_id, "explicit_id": explicit_id}
-        self.relationships_query.update({statement: params})
+        # self.relationships_query.update({statement: params})
+        self.relationships_query.append((statement, params))
