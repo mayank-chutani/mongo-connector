@@ -16,6 +16,9 @@
 # default = -1 (no maximum)
 DEFAULT_BATCH_SIZE = -1
 
+# GEO
+GEO_KEY = 'geo'
+
 # Interval in seconds between doc manager flushes (i.e. auto commit)
 # default = None (never auto commit)
 DEFAULT_COMMIT_INTERVAL = None
