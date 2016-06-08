@@ -56,6 +56,7 @@ class DocManager(DocManagerBase):
 
     def apply_id_constraint(self, doc_types):
         for doc_type in doc_types:
+            doc_type = doc_type.upper()
             constraint = "CREATE CONSTRAINT ON (d:`{doc_type}`) ASSERT d.uid IS UNIQUE".format(doc_type=doc_type)
             self.graph.cypher.execute(constraint)
 
