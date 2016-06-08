@@ -78,8 +78,8 @@ class DocManager(DocManagerBase):
         for query in builder.cypher_list:
             tx.append(query)
             # Adding cyphers from cypher list
-        for relationship in builder.relationships_query.keys():
-            tx.append(relationship, builder.relationships_query[relationship])
+        for relationship, params in builder.relationships_query:
+            tx.append(relationship, params)
         for statement in builder.statements_with_params:
             for key in statement.keys():
                 tx.append(key, statement[key])
@@ -231,8 +231,14 @@ class DocManager(DocManagerBase):
             self.apply_id_constraint(builder.doc_types)
             for statement in builder.query_nodes.keys():
                 tx.append(statement, builder.query_nodes[statement])
-            for relationship in builder.relationships_query.keys():
-                tx.append(relationship, builder.relationships_query[relationship])
+            for query in builder.cypher_list:
+                tx.append(query)
+                # Adding cyphers from cypher list
+            for relationship, params in builder.relationships_query:
+                tx.append(relationship, params)
+            for statement in builder.statements_with_params:
+                for key in statement.keys():
+                    tx.append(key, statement[key])
         try:
             tx.commit()
         except Exception as e:
