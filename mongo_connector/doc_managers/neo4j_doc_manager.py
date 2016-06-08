@@ -43,7 +43,7 @@ class DocManager(DocManagerBase):
     """
 
     def __init__(self, url, auto_commit_interval=DEFAULT_COMMIT_INTERVAL,
-                 unique_key='_id', chunk_size=DEFAULT_MAX_BULK, **kwargs):
+                 unique_key='uid', chunk_size=DEFAULT_MAX_BULK, **kwargs):
 
         self.graph = Graph(url)
         self.url = url
@@ -56,7 +56,7 @@ class DocManager(DocManagerBase):
 
     def apply_id_constraint(self, doc_types):
         for doc_type in doc_types:
-            constraint = "CREATE CONSTRAINT ON (d:`{doc_type}`) ASSERT d._id IS UNIQUE".format(doc_type=doc_type)
+            constraint = "CREATE CONSTRAINT ON (d:`{doc_type}`) ASSERT d.uid IS UNIQUE".format(doc_type=doc_type)
             self.graph.cypher.execute(constraint)
 
     def stop(self):
@@ -67,7 +67,7 @@ class DocManager(DocManagerBase):
     def upsert(self, doc, namespace, timestamp):
         """Inserts a document into Neo4j."""
         index, doc_type = self._index_and_mapping(namespace)
-        doc_id = u(doc.pop("_id"))
+        doc_id = u(doc.pop("uid"))
         metadata = { "_ts": timestamp }
         doc = self._formatter.format_document(doc)
         builder = NodesAndRelationshipsBuilder(doc, doc_type, doc_id, metadata)
@@ -225,7 +225,7 @@ class DocManager(DocManagerBase):
         tx = self.graph.cypher.begin()
         for doc in docs:
             index, doc_type = self._index_and_mapping(namespace)
-            doc_id = u(doc.pop("_id"))
+            doc_id = u(doc.pop("uid"))
             doc = self._formatter.format_document(doc)
             builder = NodesAndRelationshipsBuilder(doc, doc_type, doc_id, metadata)
             self.apply_id_constraint(builder.doc_types)
@@ -258,7 +258,7 @@ class DocManager(DocManagerBase):
         index, doc_type = self._index_and_mapping(namespace)
         params_dict = {"doc_id": doc_id}
         tx = self.graph.cypher.begin()
-        statement = "MATCH (d:Document) WHERE d._id={doc_id} OPTIONAL MATCH (d)-[r]-() DELETE d, r"
+        statement = "MATCH (d:Document) WHERE d.uid={doc_id} OPTIONAL MATCH (d)-[r]-() DELETE d, r"
         tx.append(statement, params_dict)
         tx.commit()
 
