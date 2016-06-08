@@ -33,6 +33,7 @@ class NodesAndRelationshipsBuilder(object):
                 continue
             if document[key] is None:
                 continue
+            # Handling spatial
             elif key == GEO_KEY and self.is_list(document[key]) and len(document[key]) == 2:
                 geo = document[key]
                 lat = geo[0]
@@ -69,7 +70,6 @@ class NodesAndRelationshipsBuilder(object):
 
         self.cypher_list.append(node_query)
 
-        # TODO: FIx duplicate node creation with this code
         new_params = {'parameters': parameters}
         params_query = '{match_query} SET n+={{parameters}}'.format(match_query=match_query)
         self.statements_with_params.append({params_query: new_params})
@@ -99,7 +99,7 @@ class NodesAndRelationshipsBuilder(object):
         parameters = {'uid': document_key}
         statement = "MERGE (d:`{doc_type}` {{ uid: {{parameters}}.uid}})".format(doc_type=doc_type)
         self.query_nodes.update({statement: {"parameters": parameters}})
-        self.build_relationships_query(root_type, doc_type, doc_id, document_key)
+        self.build_relationships_query(root_type, doc_type, doc_id, document_key, 1)
         self.explicit_ids.update({document_key: doc_type})
 
     def is_dict(self, doc_key):
