@@ -56,7 +56,7 @@ class NodesAndRelationshipsUpdater(object):
 
   def update_relationship(self, document, root_type, doc_type, doc_id):
     builder = NodesAndRelationshipsBuilder(document, doc_type, doc_id, [root_type])
-    builder.build_relationships_query(root_type, doc_type, doc_id, doc_id)
+    builder.build_relationships_query(root_type, doc_type, doc_id, doc_id, document.get('_r_dir', 1))
     self.statements_with_params.append(builder.query_nodes)
     self.statements_with_params.append(builder.relationships_query)
 
