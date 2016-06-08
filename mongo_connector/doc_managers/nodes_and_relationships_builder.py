@@ -58,6 +58,10 @@ class NodesAndRelationshipsBuilder(object):
                     self.build_nodes_query(json_key, json, id)
             elif self.is_multimensional_array(document[key]):
                 parameters.update(self.flatenned_property(key, document[key]))
+            elif self.is_list(document[key]):
+                for element in document[key]:
+                    self.build_relationships_query(doc_type, key, id, element, 1)
+                    self.build_nodes_query(key, {'uid': element, 'name': element}, element)
             else:
                 parameters.update({key: self.format_params(document[key])})
 
