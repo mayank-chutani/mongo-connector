@@ -23,6 +23,7 @@ class NodesAndRelationshipsBuilder(object):
 
     def build_nodes_query(self, doc_type, document, id):
         self.doc_types.append(doc_type)
+        doc_type = doc_type.upper()
         parameters = {'uid': id}
         # parameters = {}
         if self.is_dict(self.metadata):
@@ -136,6 +137,8 @@ class NodesAndRelationshipsBuilder(object):
         return ((type(doc_key) is list) and (doc_key) and (type(doc_key[0]) is dict))
 
     def build_relationships_query(self, main_type, node_type, doc_id, explicit_id, relationship_direction):
+        main_type = main_type.upper()
+        node_type = node_type.upper()
         relationship_type = main_type + "_" + node_type
         if relationship_direction == 1:
             statement = "MATCH (a:`{main_type}`), (b:`{node_type}`) WHERE a.uid={{doc_id}} AND b.uid ={{explicit_id}} CREATE UNIQUE (a)-[r:`{relationship_type}`]->(b)".format(
